@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# DuckDB
+*.duckdb
+*.duckdb.wal
+
+# SQLite
+*.sqlite
+*.db
+
+# Data (generators commit, generated data does not)
+data/synthetic/*.csv
+data/synthetic/*.parquet
+data/synthetic/*.json
+data/raw/
+
+# ML artifacts (model commits, training data does not)
+ml/data/
+*.pkl
+!ml/models/*.pkl
+
+# Node / Next.js (for ui/ folder later)
+node_modules/
+.next/
+out/
+
+# Editor
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Env
+.env
+.env.local
