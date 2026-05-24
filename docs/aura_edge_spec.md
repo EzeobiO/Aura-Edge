@@ -4,7 +4,7 @@
 
 ---
 
-## 1. What this project is (revised)
+## 1. What this project is
 
 A data engineering project that ingests live aviation flight data, simulates an edge node that buffers telemetry under intermittent connectivity, runs an ML model to predict component failures, and lands clean data in a dimensional warehouse. A dashboard sits on top of the warehouse for human-facing monitoring.
 
@@ -69,9 +69,9 @@ A data engineering project that ingests live aviation flight data, simulates an 
 
 ## 3. Data sources
 
-### public
+### Public
 
-| Source | What we use it for | URL |
+| Source | What it is used it for | URL |
 |---|---|---|
 | **OpenSky Network API** | Live flight state vectors — position, altitude, velocity, on-ground flag, ICAO24 aircraft ID. Free, no auth for basic use. | https://opensky-network.org/api/states/all |
 | **BTS On-Time Performance** | Historical flight schedules + delay reasons. Free CSV download. | https://www.transtats.bts.gov |
@@ -80,7 +80,7 @@ A data engineering project that ingests live aviation flight data, simulates an 
 
 ### Synthetic
 
-| Synthetic data | Why synthetic | How I generate it |
+| Synthetic data | Why synthetic | How it's generated |
 |---|---|---|
 | **Engine telemetry** (temp, hydraulic pressure, vibration) | Airlines don't release this publicly. | Function of flight phase + injected anomalies. Cruise = stable; takeoff/climb = high temp; rare 1-2% anomalies (rising temp + pressure drop) seeded as "failure events" for the ML model to learn. |
 | **Maintenance events** | Not joined to specific tail numbers publicly. | Correlated with synthetic anomalies; injected at realistic frequencies (scheduled 250 flight hours, reactive after high-anomaly windows). |
@@ -150,7 +150,7 @@ CREATE TABLE fact_flight (
 
 ### Dimensions
 
-**`dim_aircraft`** — Type 2 SCD (we track changes to fleet assignment, registration, etc.)
+**`dim_aircraft`** — Type 2 SCD (track changes to fleet assignment, registration, etc.)
 ```sql
 CREATE TABLE dim_aircraft (
     aircraft_key        INTEGER   PRIMARY KEY,  -- surrogate
@@ -188,8 +188,8 @@ CREATE TABLE dim_airport (
 ### Why these choices
 
 - **Surrogate keys** on dims so I can rebuild source IDs without breaking facts, and so SCD Type 2 history works.
-- **Date and time as separate dimensions** — classic Kimball. Lets you query "average engine temp by hour of day across all dates" cheaply.
-- **`alert_level` denormalized onto the fact** — alert_level is computed from `failure_probability`, but storing it avoids a band lookup at query time. Classic facts-store-the-grain pattern.
+- **Date and time as separate dimensions** — classic Kimball. Lets me query "average engine temp by hour of day across all dates" cost effectively.
+- **`alert_level` denormalized onto the fact** — alert_level is computed from `failure_probability`, but storing it avoids a band lookup at query time. A facts-store-the-grain pattern.
 - **`source_node_id` on every fact row** — preserves edge provenance for the eventual-consistency story.
 
 ### BigQuery equivalent
@@ -228,7 +228,7 @@ Same shape, with `INT64` instead of `INTEGER`, `STRING` instead of `VARCHAR`, pa
 ### Plan 2
 
 | Phase | What |
-|---|---|---|
+|---|---|
 | 5 | Edge sync layer: SQLite buffer + LWW-Register + offline toggle |
 | 6 | ML scoring: train model, integrate into Beam as DoFn |
 | 7 | FastAPI + Next.js dashboard (Figma-generated) |
